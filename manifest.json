@@ -1,0 +1,17 @@
+{
+  "name": "TOROX",
+  "short_name": "TOROX",
+  "description": "Tu música, sin límites",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "https://archive.org/services/img/02-tristeza_202606/full/pct:500/0/default.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}
