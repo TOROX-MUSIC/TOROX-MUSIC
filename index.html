@@ -290,7 +290,7 @@ img{display:block;width:100%;height:100%;object-fit:cover;}
           Descargar todo
         </button>
       </div>
-      <div class="ob-sub" id="dl-sub">Descarga las canciones para escuchar sin conexión</div>
+      <div class="ob-sub" id="dl-sub">Toca ⬇️ en cualquier álbum para descargarlo</div>
       <div class="ob-progress" id="dl-prog-wrap" style="display:none;">
         <div class="ob-fill" id="dl-fill"></div>
       </div>
@@ -493,9 +493,34 @@ async function downloadAll(){
   toast('✅ Música lista para escuchar sin internet');
 }
 
-function updateDlProgress(){
-  var pct=(dlCount/dlTotal)*100;
-  document.getElementById('dl-fill').style.width=pct+'%';
+async function downloadAlbum(albumName){
+  var albumSongs=songs.filter(function(s){return s.album===albumName&&s.cloud;});
+  if(!albumSongs.length){toast('⚠️ No hay canciones para descargar');return;}
+  var already=albumSongs.filter(isOffline).length;
+  if(already===albumSongs.length){toast('✅ '+albumName+' ya está descargado');return;}
+  toast('⬇️ Descargando '+albumName+'...');
+  document.getElementById('dl-prog-wrap').style.display='block';
+  document.getElementById('dl-status').textContent='Descargando: '+albumName;
+  var count=0;
+  for(var i=0;i<albumSongs.length;i++){
+    var s=albumSongs[i];
+    if(isOffline(s)){count++;continue;}
+    try{
+      var resp=await fetch(s.url);
+      if(!resp.ok) throw new Error();
+      var blob=await resp.blob();
+      var reader=new FileReader();
+      await new Promise(function(res){reader.onload=function(e){offlineCache[s.url]=e.target.result;s.localUrl=e.target.result;res();};reader.readAsDataURL(blob);});
+      count++;
+      document.getElementById('dl-fill').style.width=((count/albumSongs.length)*100)+'%';
+      document.getElementById('dl-status').textContent=count+'/'+albumSongs.length+' canciones descargadas';
+    }catch(e){count++;}
+  }
+  saveOffline();
+  renderShelf();
+  renderSongs();
+  toast('✅ '+albumName+' listo sin internet');
+  document.getElementById('dl-status').textContent='✅ '+albumName+' disponible sin internet';
 }
 
 function saveOffline(){
